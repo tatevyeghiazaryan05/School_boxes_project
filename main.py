@@ -1,4 +1,4 @@
-from database import engine
+# from database import engine
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from fastapi import FastAPI
@@ -17,3 +17,7 @@ conn = psycopg2.connect(
 cursor = conn.cursor()
 
 app = FastAPI()
+
+
+#todo create admin_panel
+#todo user will see products and filter
