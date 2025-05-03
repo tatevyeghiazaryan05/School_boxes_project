@@ -10,7 +10,7 @@ conn = psycopg2.connect(
     port=5432,
     user="postgres",
     password="password",
-    database="online_store",
+    database="school_boxes_project",
     cursor_factory=RealDictCursor
     )
 
