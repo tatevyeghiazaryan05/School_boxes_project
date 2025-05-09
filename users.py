@@ -13,10 +13,11 @@ def user_get_products():
     main_products={}
     for c in products_category:
         main.cursor.execute("SELECT * FROM products WHERE category=%s",
-                            (c,))
-        products = random.shuffle(main.cursor.fetchall())
-        selected_products = products[::2]
-        main_products.update(selected_products)
+                            (dict(c).get('category'),))
+        products=main.cursor.fetchall()
+        random.shuffle(products)
+        selected_products = products[:2]
+        main_products[dict(c).get('category')] = selected_products
 
     return main_products
 
