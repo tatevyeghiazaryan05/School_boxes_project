@@ -1,3 +1,5 @@
+import random
+
 from fastapi import APIRouter
 import main
 
@@ -6,7 +8,17 @@ user_router = APIRouter()
 
 @user_router.get("/api/user/get/products")
 def user_get_products():
-    pass
+    main.cursor.execute("SELECT DISTINCT category FROM  products")
+    products_category = main.cursor.fetchall()
+    main_products={}
+    for c in products_category:
+        main.cursor.execute("SELECT * FROM products WHERE category=%s",
+                            (c,))
+        products = random.shuffle(main.cursor.fetchall())
+        selected_products = products[::2]
+        main_products.update(selected_products)
+
+    return main_products
 
 
 @user_router.get("/api/user/filter/products/by/brand/{product_brand}")
@@ -50,17 +62,11 @@ def filter_products_by_color(color: str):
     return products
 
 
-@user_router.get("/api/user/filter/products/by/status/{is_active}")
-def filter_products_by_status(is_active: bool):
-    main.cursor.execute("SELECT * FROM products WHERE is_active = %s",
-                        (is_active,))
-    products = main.cursor.fetchall()
-    return products
-
-
 @user_router.get("/api/user/filter/products/by/tags")
 def filter_products_by_tags(tags: str):
     main.cursor.execute("SELECT * FROM products WHERE tags LIKE %s",
                         ('%' + tags + '%',))
     products = main.cursor.fetchall()
     return products
+
+
