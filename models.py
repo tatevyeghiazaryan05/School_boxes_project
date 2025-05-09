@@ -46,3 +46,10 @@ class Feedback(Base):
     rating = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
 
+
+class Forgotpasswordcode(Base):
+    __tablename__ = "forgotpasswordcode"
+    id = Column(Integer, nullable=False, primary_key=True)
+    code = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))

@@ -2,8 +2,13 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from fastapi import FastAPI
-from home_page import user_router
+from home_page import home_page_router
+from users import user_router
 from fastapi.staticfiles import StaticFiles
+from auth import authrouter
+import os
+
+os.makedirs("uploads", exist_ok=True)
 
 
 
@@ -25,6 +30,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 app.include_router(user_router)
-
+app.include_router(authrouter)
+app.include_router(home_page_router)
 #todo user auth +
 #todo image must be url +
