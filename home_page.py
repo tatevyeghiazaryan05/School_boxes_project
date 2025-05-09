@@ -69,5 +69,3 @@ def filter_products_by_tags(tags: str):
                         ('%' + tags + '%',))
     products = main.cursor.fetchall()
     return products
-
-
