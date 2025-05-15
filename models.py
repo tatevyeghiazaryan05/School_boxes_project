@@ -69,6 +69,6 @@ class Orders(Base):
 class ChangePasswordCode(Base):
     __tablename__ = "changepasswordcodes"
     id = Column(Integer, nullable=False, primary_key=True)
-    code = Column(Integer, nullable=False)
+    code = Column(String, nullable=False)
     email = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
