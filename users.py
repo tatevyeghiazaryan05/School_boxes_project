@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import main
-from schema import UserNameChangeSchema, UserPasswordChangeSchema, AdminPasswordRecoverSchema, UserFeedbackSchema
+from schema import UserNameChangeSchema, UserPasswordChangeSchema, AdminPasswordRecoverSchema, UserFeedbackSchema, UserOrdersSchema
 from security import get_current_user, pwd_context
 from pydantic import EmailStr
 from email_service import send_verification_email
@@ -129,3 +129,51 @@ def user_feedback(feedback_data: UserFeedbackSchema):
     main.conn.commit()
 
     return "Feedback added successfully!!"
+
+
+@user_router.post("/api/orders/user")
+def user_order(order_data: UserOrdersSchema, token=Depends(get_current_user)):
+    user_id = token["id"]
+    total_price = 0
+    main.cursor.execute("SELECT price FROM products WHERE id = %s",
+                        (order_data.product_id,))
+    product_price = main.cursor.fetchone()
+
+    if not product_price:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    product_price = dict(product_price).get("price")
+    total_price += (product_price * order_data.quantity)
+
+    main.cursor.execute("INSERT INTO orders (user_id, product_id, quantity, total_price, shipping_address) VALUES (%s, %s, %s, %s, %s)",
+        (user_id, order_data.product_id, order_data.quantity, total_price, order_data.shipping_address))
+
+    main.conn.commit()
+
+    # message = f"New Order: User ID {user_id}, Drink ID {order_data.product_id}, Qty {order_data.quantity}, Total ${total_price}"
+    # main.cursor.execute("INSERT INTO notifications (message, is_read) VALUES (%s, %s)",
+    #                     (message, False))
+    main.conn.commit()
+
+    return "Order created successfully"
+
+
+@user_router.get("/api/users/get/today/orders/total/sum/")
+def get_today_orders_sum():
+    pass
+
+
+@user_router.get("/api/users/get/week/orders/week/sum/")
+def get_week_orders_sum():
+    pass
+
+
+@user_router.get("/api/users/get/month/orders/total/sum/")
+def get_month_orders_sum():
+    pass
+
+
+@user_router.get("/api/users/get/year/orders/total/sum/")
+def get_year_orders_sum():
+    pass
+

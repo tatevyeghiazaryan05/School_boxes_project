@@ -23,3 +23,9 @@ class UserFeedbackSchema(BaseModel):
     user_id:int
     comment: str
     rating: int
+
+
+class UserOrdersSchema(BaseModel):
+    quantity: int
+    shipping_address: str
+    product_id: int

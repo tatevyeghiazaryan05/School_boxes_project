@@ -53,3 +53,22 @@ class Forgotpasswordcode(Base):
     code = Column(String, nullable=False)
     email = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
+
+
+class Orders(Base):
+    __tablename__ = "orders"
+    id = Column(Integer, nullable=False, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    total_price = Column(Float, nullable=False)
+    shipping_address = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
+
+
+class ChangePasswordCode(Base):
+    __tablename__ = "changepasswordcodes"
+    id = Column(Integer, nullable=False, primary_key=True)
+    code = Column(Integer, nullable=False)
+    email = Column(String, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))

@@ -32,5 +32,3 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(user_router)
 app.include_router(authrouter)
 app.include_router(home_page_router)
-#todo user auth +
-#todo image must be url +
