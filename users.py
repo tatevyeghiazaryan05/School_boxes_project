@@ -150,9 +150,9 @@ def user_order(order_data: UserOrdersSchema, token=Depends(get_current_user)):
 
     main.conn.commit()
 
-    # message = f"New Order: User ID {user_id}, Drink ID {order_data.product_id}, Qty {order_data.quantity}, Total ${total_price}"
-    # main.cursor.execute("INSERT INTO notifications (message, is_read) VALUES (%s, %s)",
-    #                     (message, False))
+    message = f"New Order: User ID {user_id}, Drink ID {order_data.product_id}, Qty {order_data.quantity}, Total ${total_price}"
+    main.cursor.execute("INSERT INTO notifications (message, is_read) VALUES (%s, %s)",
+                         (message, False))
     main.conn.commit()
 
     return "Order created successfully"
