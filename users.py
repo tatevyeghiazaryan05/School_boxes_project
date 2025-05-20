@@ -4,7 +4,7 @@ from schema import UserNameChangeSchema, UserPasswordChangeSchema, AdminPassword
 from security import get_current_user, pwd_context
 from pydantic import EmailStr
 from email_service import send_verification_email
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 
 user_router = APIRouter()
@@ -158,40 +158,10 @@ def user_order(order_data: UserOrdersSchema, token=Depends(get_current_user)):
     return "Order created successfully"
 
 
-@user_router.get("/api/users/get/today/orders/total/price/{user_id}")
-def get_today_orders_total_price(user_id: int):
-    today = datetime.today().date()
-    main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND DATE(created_at) = %s",
-                        (user_id, today))
-    total_price = main.cursor.fetchone()
-    return total_price
-
-
-@user_router.get("/api/users/get/week/orders/total/sum/by/user_id/{user_id}")
-def get_week_orders_sum(user_id: int):
-    today = datetime.today().date()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
-
-    main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND DATE(created_at) BETWEEN %s AND %s",
-                        (user_id, start_of_week, end_of_week))
-
-    total_price = main.cursor.fetchone()
-    return total_price
-
-
-@user_router.get("/api/users/get/month/orders/total/price/{user_id}/{month_in_number}/{year}")
-def get_month_orders_total_price(user_id: int, month_in_number: int, year: int):
-    main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND EXTRACT(MONTH FROM created_at)=%s "
-                        "AND EXTRACT(YEAR FROM created_at) = %s",
-                        (user_id, month_in_number, year))
-    total_price = main.cursor.fetchone()
-    return total_price
-
-
-@user_router.get("/api/users/get/year/orders/total/price/{user_id}/{year}")
-def get_year_orders_total_price(user_id: int, year: int):
-    main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND EXTRACT(YEAR FROM created_at) = %s",
-                        (user_id, year))
+@user_router.get("/api/users/get/orders/total/price/{user_id}/{start_date}/{end_date}")
+def get_orders_total_price(user_id: int, start_date: date, end_date: date):
+    main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND created_at >= %s  AND created_at <= %s",
+        (user_id, start_date, end_date)
+    )
     total_price = main.cursor.fetchone()
     return total_price
