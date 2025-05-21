@@ -165,3 +165,6 @@ def get_orders_total_price(user_id: int, start_date: date, end_date: date):
     )
     total_price = main.cursor.fetchone()
     return total_price
+
+
+#todo all apies must be try excapt

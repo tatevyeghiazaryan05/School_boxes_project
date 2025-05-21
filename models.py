@@ -81,3 +81,23 @@ class Boss(Base):
     email = Column(String, nullable=False)
     password = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
+
+
+class DefaultBoxesBoxes(Base):
+    __tablename__ ="default_boxes"
+    id = Column(Integer, nullable=False, primary_key=True)
+    price = Column(Float, nullable=False)
+    box_type = Column(String, nullable=False)
+    suitable_for_class = Column(Integer, nullable=False)
+    discount = Column(Float, server_default="0")
+
+
+class Boxes(Base):
+    __tablename__ = "boxes"
+    id = Column(Integer, nullable=False, primary_key=True)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    count = Column(Integer, nullable=False)
+    box_id = Column(Integer, ForeignKey("default_boxes.id"), nullable=False)
+
+
+#todo boss_panel
