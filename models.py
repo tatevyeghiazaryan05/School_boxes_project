@@ -101,3 +101,8 @@ class Boxes(Base):
 
 
 #todo boss_panel
+#todo create table where will be default_boxes product limits and add in a box that products
+#todo admin add real products
+#todo creat default boxes
+#todo pay system
+

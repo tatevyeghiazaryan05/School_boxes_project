@@ -13,28 +13,39 @@ user_router = APIRouter()
 @user_router.put("/api/user/change/name")
 def change_user_name(data: UserNameChangeSchema, token=Depends(get_current_user)):
     user_id = token["id"]
-    main.cursor.execute("UPDATE users SET name = %s WHERE id = %s", (data.name, user_id))
-    main.conn.commit()
-    return "Updated successfully!!"
+    try:
+        main.cursor.execute("UPDATE users SET name = %s WHERE id = %s", (data.name, user_id))
+        main.conn.commit()
+        return "Updated successfully!!"
+    except Exception as e:
+        main.conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating name: {str(e)}")
 
 
 @user_router.put("/api/user/change/password")
 def change_user_password(data: UserPasswordChangeSchema, token=Depends(get_current_user)):
     user_id = token["id"]
     new_hashed_password = pwd_context.hash(data.password)
-    main.cursor.execute("UPDATE users SET password = %s WHERE id = %s",
+    try:
+        main.cursor.execute("UPDATE users SET password = %s WHERE id = %s",
                         (new_hashed_password, user_id))
-    main.conn.commit()
-    return "Password updated successfully!!"
+        main.conn.commit()
+        return "Password updated successfully!!"
+    except Exception as e:
+        main.conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error updating password: {str(e)}")
 
 
 @user_router.get("/api/users/my-account-info")
 def get_user_my_account_info(token=Depends(get_current_user)):
     user_id = token["id"]
-    main.cursor.execute("SELECT email,name FROM users WHERE id=%s",
+    try:
+        main.cursor.execute("SELECT email,name FROM users WHERE id=%s",
                         (user_id,))
-    data = main.cursor.fetchall()
-    return data
+        data = main.cursor.fetchall()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching account info: {str(e)}")
 
 
 @user_router.get("/api/users/for/forgot/password/code/{email}")
@@ -112,10 +123,14 @@ def user_forgot_password(data: AdminPasswordRecoverSchema):
 def password_recovery(data: UserPasswordChangeSchema, token=Depends(get_current_user)):
     user_id = token["id"]
     new_password = pwd_context.hash(data.password)
-    main.cursor.execute("UPDATE users SET password =%s WHERE id=%s",
+    try:
+        main.cursor.execute("UPDATE users SET password =%s WHERE id=%s",
                         (new_password, user_id))
-    main.conn.commit()
-    return "New password updated successfully!!"
+        main.conn.commit()
+        return "New password updated successfully!!"
+    except Exception as e:
+        main.conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error during password recovery: {str(e)}")
 
 
 @user_router.post("/api/users/feedback")
@@ -124,47 +139,62 @@ def user_feedback(feedback_data: UserFeedbackSchema):
     comment = feedback_data.comment
     rating = feedback_data.rating
 
-    main.cursor.execute("INSERT INTO feedback (user_id,comment,rating) VALUES (%s,%s,%s)",
+    try:
+        main.cursor.execute("INSERT INTO feedback (user_id,comment,rating) VALUES (%s,%s,%s)",
                         (user_id, comment, rating))
-    main.conn.commit()
+        main.conn.commit()
 
-    return "Feedback added successfully!!"
+        return "Feedback added successfully!!"
+    except Exception as e:
+        main.conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error saving feedback: {str(e)}")
 
 
 @user_router.post("/api/orders/user")
 def user_order(order_data: UserOrdersSchema, token=Depends(get_current_user)):
     user_id = token["id"]
     total_price = 0
-    main.cursor.execute("SELECT price FROM products WHERE id = %s",
+    try:
+        main.cursor.execute("SELECT price FROM products WHERE id = %s",
                         (order_data.product_id,))
-    product_price = main.cursor.fetchone()
+        product_price = main.cursor.fetchone()
 
-    if not product_price:
-        raise HTTPException(status_code=404, detail="Product not found")
+        if not product_price:
+            raise HTTPException(status_code=404, detail="Product not found")
 
-    product_price = dict(product_price).get("price")
-    total_price += (product_price * order_data.quantity)
+        product_price = dict(product_price).get("price")
+        total_price += (product_price * order_data.quantity)
 
-    main.cursor.execute("INSERT INTO orders (user_id, product_id, quantity, total_price, shipping_address) VALUES (%s, %s, %s, %s, %s)",
-        (user_id, order_data.product_id, order_data.quantity, total_price, order_data.shipping_address))
+        main.cursor.execute("""INSERT INTO orders   
+                        (user_id, product_id, quantity, total_price, shipping_address) 
+                        VALUES (%s, %s, %s, %s, %s)""",
+            (user_id, order_data.product_id, order_data.quantity, total_price, order_data.shipping_address))
 
-    main.conn.commit()
+        main.conn.commit()
 
-    message = f"New Order: User ID {user_id}, Drink ID {order_data.product_id}, Qty {order_data.quantity}, Total ${total_price}"
-    main.cursor.execute("INSERT INTO notifications (message, is_read) VALUES (%s, %s)",
+        message = f"New Order: User ID {user_id}, Drink ID {order_data.product_id}, Qty {order_data.quantity}, Total ${total_price}"
+        main.cursor.execute("INSERT INTO notifications (message, is_read) VALUES (%s, %s)",
                          (message, False))
-    main.conn.commit()
+        main.conn.commit()
 
-    return "Order created successfully"
+        return "Order created successfully"
+    except HTTPException:
+        raise
+    except Exception as e:
+        main.conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error creating order: {str(e)}")
 
 
 @user_router.get("/api/users/get/orders/total/price/{user_id}/{start_date}/{end_date}")
 def get_orders_total_price(user_id: int, start_date: date, end_date: date):
-    main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND created_at >= %s  AND created_at <= %s",
+    try:
+        main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND created_at >= %s  AND created_at <= %s",
         (user_id, start_date, end_date)
-    )
-    total_price = main.cursor.fetchone()
-    return total_price
+        )
+        total_price = main.cursor.fetchone()
+        return total_price
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving total price: {str(e)}")
 
 
-#todo all apies must be try excapt
+#todo all apies must be try excapt+
