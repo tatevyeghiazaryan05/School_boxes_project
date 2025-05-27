@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-import main
-from schema import UserNameChangeSchema, UserPasswordChangeSchema, AdminPasswordRecoverSchema, UserFeedbackSchema, UserOrdersSchema
-from security import get_current_user, pwd_context
-from pydantic import EmailStr
-from email_service import send_verification_email
 from datetime import datetime, timedelta, date
+
+from pydantic import EmailStr
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
+import main
+from security import get_current_user, pwd_context
+from email_service import send_verification_email
+from schema import (UserNameChangeSchema,
+                    UserPasswordChangeSchema,
+                    AdminPasswordRecoverSchema,
+                    UserFeedbackSchema, UserOrdersSchema)
 
 
 user_router = APIRouter()
@@ -188,7 +194,8 @@ def user_order(order_data: UserOrdersSchema, token=Depends(get_current_user)):
 @user_router.get("/api/users/get/orders/total/price/{user_id}/{start_date}/{end_date}")
 def get_orders_total_price(user_id: int, start_date: date, end_date: date):
     try:
-        main.cursor.execute("SELECT SUM(total_price) FROM orders WHERE user_id = %s AND created_at >= %s  AND created_at <= %s",
+        main.cursor.execute("SELECT SUM(total_price) FROM orders "
+                            "WHERE user_id = %s AND created_at >= %s  AND created_at <= %s",
         (user_id, start_date, end_date)
         )
         total_price = main.cursor.fetchone()

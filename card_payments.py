@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 card_payments_router = APIRouter()
 
 
-@card_payments_router.post("/api/payments/card/payment-start")
+@card_payments_router.post("/api/payments/card/payment-start")  # todo
 def card_payment_start(payments_data: PaymentInitializationSchema, token=Depends(get_current_user)):
     user_id = token["id"]
     main.cursor.execute("INSERT INTO cardpayments (order_id,user_id,amount) VALUES (%s,%s,%s)",
@@ -38,4 +38,3 @@ def card_payment_success():
 @card_payments_router.get("/api/payments/card/payment-fail")
 def card_payment_fail():
     return FileResponse("payments_fail.html")
-

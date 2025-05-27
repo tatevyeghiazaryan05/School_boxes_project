@@ -1,6 +1,7 @@
 import random
 
 from fastapi import APIRouter, HTTPException
+
 import main
 
 home_page_router = APIRouter()

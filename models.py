@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Integer, Float, TIMESTAMP, text,ARRAY, Boolean, ForeignKey
+
 from database import Base
 
 
@@ -83,7 +84,7 @@ class Boss(Base):
     created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
 
 
-class DefaultBoxesBoxes(Base):
+class DefaultBoxes(Base):
     __tablename__ ="default_boxes"
     id = Column(Integer, nullable=False, primary_key=True)
     price = Column(Float, nullable=False)
@@ -100,9 +101,23 @@ class Boxes(Base):
     box_id = Column(Integer, ForeignKey("default_boxes.id"), nullable=False)
 
 
-#todo boss_panel
+class CardPayments(Base):
+    __tablename__ = "cardpayments"
+    id = Column(Integer, nullable=False, primary_key=True)
+    order_id = Column(String, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    amount = Column(Float, nullable=False)
+    status = Column(String, nullable=False, server_default='pending')
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP, nullable=True)
+
+
+
+#todo boss_panel , statistics
+#todo admin statistics (how many boxes are import,export)
+#todo change imports positions +
 #todo create table where will be default_boxes product limits and add in a box that products
-#todo admin add real products
+#todo admin add real products +
 #todo creat default boxes
-#todo pay system
+#todo pay system +
 

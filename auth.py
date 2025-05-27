@@ -1,5 +1,6 @@
-import main
 from fastapi import APIRouter, HTTPException, status, Form
+
+import main
 from schema import UserLoginSchema
 from security import pwd_context, create_access_token
 
